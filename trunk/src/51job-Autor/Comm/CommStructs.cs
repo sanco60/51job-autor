@@ -17,4 +17,6 @@ namespace MyFirstWebTest
         public string szSearchText;
         public ESearchCata eSearchCata;
     }
+
 }
+

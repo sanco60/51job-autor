@@ -44,11 +44,11 @@ namespace MyFirstWebTest
         public bool restore()
         {
             SUserAccount _ua = new SUserAccount();
-            int userLength = 1;
-            DatabaseObj[] _uaaList = new DatabaseObj[userLength];
+            int _userLength = 1, _rest = 0;
+            DatabaseObj[] _uaaList = new DatabaseObj[_userLength];
             _uaaList[0] = new UserAccountAdapter();
 
-            m_DatabaseAdapter.getDatas(ref _uaaList);
+            m_DatabaseAdapter.getDatas(ref _uaaList, out _rest);
 
             Object _oUA = _ua;
             _uaaList[0].put(ref _oUA);

@@ -33,7 +33,25 @@ namespace MyFirstWebTest
 
             string _szFileName = list[0].getTitle() + AutorConstPool.FILE_SUFFIX;
             ConfigFileReader _cfr = new ConfigFileReader(_szFileName);
-            _cfr.read(iStart, iStart + list.Length)
+            _cfr.read();
+
+            List<List<string>> _valueRows = _cfr.getValueRows();
+            List<string> _attrNames = _cfr.getAttrNames();
+                        
+            for (int _i = 0, _indexList = 0; _i < _valueRows.Count; _i++, _indexList++)
+            {
+                if (_i < iStart || _valueRows[_i].Count != _attrNames.Count)
+                    continue;
+                if (_indexList == list.Length)
+                {
+                    iRest = _valueRows.Count - _i;
+                    break;
+                }
+                for (int _j = 0; _j < _attrNames.Count; _j++)
+                {
+                    list[_indexList].setValue(_attrNames[_j], _valueRows[_i][_j]);
+                }
+            }
             return true;
         }
 

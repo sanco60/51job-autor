@@ -17,10 +17,25 @@ namespace MyFirstWebTest
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            if (!init())
+            {
+                Console.WriteLine("Error: init failed!");
+                return;
+            }
             s_Form1 = new Form1();
             Application.Run(s_Form1);
+        }
+
+        static bool init()
+        {
+            if (!UserManager.init())
+            {
+                return false;
+            }
+            return true;
         }
 
         private static Form1 s_Form1;
     }
 }
+

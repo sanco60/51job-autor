@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="Action\ApplyAction.cs" />
     <Compile Include="Comm\ConstPool.cs" />
+    <Compile Include="Utils\ConfigFileReader.cs" />
     <Compile Include="Database\DatabaseAccesor.cs" />
     <Compile Include="Database\DatabaseAdapter.cs" />
     <Compile Include="Action\FilterAction.cs" />

@@ -45,6 +45,7 @@ namespace MyFirstWebTest
     public static class AutorConstPool
     {
         public const string FILE_SUFFIX = ".txt";
+        public const string NULL_STRING = "\"\"";
     }
 
     public static class SayNoCoName
