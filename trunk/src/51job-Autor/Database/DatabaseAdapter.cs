@@ -8,19 +8,61 @@ namespace MyFirstWebTest
 {
     class DatabaseAdapter
     {
-        public DatabaseAdapter()
+        private DatabaseAdapter()
         {
             m_DatabaseAccesor = DatabaseAccesor.instance();
         }
 
-        public void getDatas(ref DatabaseObj[] list, out int iRest)
+        public void getDatas(EDatabaseType dType, ref List<Object> list, out int iRest)
         {
-            m_DatabaseAccesor.getDatas(ref list, out iRest);
+            List<DatabaseObj> _objList = new List<DatabaseObj>();
+            m_DatabaseAccesor.getDatas(dType, ref _objList, out iRest);
+
+            if (0 == _objList.Count)
+                return;
+
+            if (EDatabaseType.EUserAccount == dType)
+            {
+                foreach(DatabaseObj _obj in _objList)
+                {
+                    Object _ua = new SUserAccount();
+                    
+                    _obj.put(ref _ua);
+                    list.Add(_ua);
+                }
+            }
+            else if (EDatabaseType.ESearchFactor == dType)
+            {
+                foreach (DatabaseObj _obj in _objList)
+                {
+                    Object _ua = new SSearchFactor();
+
+                    _obj.put(ref _ua);
+                    list.Add(_ua);
+                }
+            }
+            else if (EDatabaseType.EForbiddenCorp == dType)
+            {
+                foreach (DatabaseObj _obj in _objList)
+                {
+                    Object _ua = new SForbiddenCorp();
+
+                    _obj.put(ref _ua);
+                    list.Add(_ua);
+                }
+            }
             return;
         }
 
+        public static DatabaseAdapter instance()
+        {
+            if (null == s_DatabaseAdapter)
+                s_DatabaseAdapter = new DatabaseAdapter();
+            return s_DatabaseAdapter;
+        }
+
         //静态成员
-        //private static DatabaseAdapter s_DatabaseAdapter;
+        private static DatabaseAdapter s_DatabaseAdapter;
 
         private DatabaseAccesor m_DatabaseAccesor;
 

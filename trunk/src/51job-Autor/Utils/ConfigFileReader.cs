@@ -17,33 +17,52 @@ namespace MyFirstWebTest
             m_valueRows = new List<List<string>>();
         }
 
-        public void read()
+        public bool read()
         {
-            StreamReader _sr = new StreamReader(m_fileName);
+            StreamReader _sr;
+            try
+            {
+                _sr = new StreamReader(m_fileName, Encoding.Default);
+            } 
+            catch(System.IO.FileNotFoundException _ioe)
+            {
+                Console.WriteLine(_ioe);
+                return false;
+            }
+
             int iValueIndex = -1;
             string szLine;
 
-            do 
+            do
             {
                 szLine = _sr.ReadLine();
+                if (null == szLine)
+                    break;
+
                 if (0 > iValueIndex)
                 {
                     disassembleLine(szLine, ref m_attrNames);
                     //属性行下一行跳过
-                    _sr.ReadLine();
-                } else 
+                    szLine = _sr.ReadLine();
+                }
+                else
                 {
-                    m_valueRows[iValueIndex] = new List<string>();
+                    m_valueRows.Add(new List<string>());
                     List<string> _curRow = m_valueRows[iValueIndex];
                     disassembleLine(szLine, ref _curRow);
                 }
-                iValueIndex++;
-            }
-            while(null != szLine);
+                iValueIndex = iValueIndex + 1;
+
+            } while (null != szLine);
+
+            return true;
         }
 
         public void disassembleLine(string szLine, ref List<string> list)
         {
+            if (null == szLine || 0 == szLine.Length)
+                return;
+
             char [] cSplits = {' ', '\t'};
             string[] szSplits = szLine.Split(cSplits);
             foreach(string _sz in szSplits)
@@ -53,7 +72,8 @@ namespace MyFirstWebTest
                     list.Add("");
                 } else
                 {
-                    list.Add(_sz);
+                    if (0 != _sz.Length)
+                        list.Add(_sz);
                 }
             }
             return;

@@ -28,8 +28,8 @@ namespace MyFirstWebTest
         protected override void innerPick(ref Object t)
         {
             SUserAccount _ua = (SUserAccount)t;
-            m_AttrValues.Add(c_AttrID, _ua.szID);
-            m_AttrValues.Add(c_AttrPassword, _ua.szPassword);
+            m_AttrValues[c_AttrID] = _ua.szID;
+            m_AttrValues[c_AttrPassword] = _ua.szPassword;
         }
 
         protected override void innerPut(ref Object t)
@@ -43,5 +43,13 @@ namespace MyFirstWebTest
         {
             return c_Title;
         }
+
+        public override DatabaseObj clone()
+        {
+            UserAccountAdapter _uaa = new UserAccountAdapter();
+
+            return _uaa;
+        }
+
     }
 }

@@ -11,7 +11,7 @@ namespace MyFirstWebTest
         private UserManager()
         {
             m_uaList = new List<SUserAccount>();
-            m_DatabaseAdapter = new DatabaseAdapter();
+            m_DatabaseAdapter = DatabaseAdapter.instance();
         }
 
         public static bool init()
@@ -32,27 +32,29 @@ namespace MyFirstWebTest
             return s_UserManager;
         }
 
-        public bool getUserAccount(ref SUserAccount ua)
+        public SUserAccount getUserAccount()
         {
             if (0 == m_uaList.Count)
-                return false;
+                return null;
 
-            ua = m_uaList[0];
-            return true;
+            return m_uaList[0];
         }
 
         public bool restore()
         {
-            SUserAccount _ua = new SUserAccount();
-            int _userLength = 1, _rest = 0;
-            DatabaseObj[] _uaaList = new DatabaseObj[_userLength];
-            _uaaList[0] = new UserAccountAdapter();
+            int _rest = 0;
+            List<Object> _list = new List<Object>();
 
-            m_DatabaseAdapter.getDatas(ref _uaaList, out _rest);
+            m_DatabaseAdapter.getDatas(EDatabaseType.EUserAccount, ref _list, out _rest);
+            if (0 == _list.Count)
+                return false;
 
-            Object _oUA = _ua;
-            _uaaList[0].put(ref _oUA);
-            
+            m_uaList.Clear();
+            foreach(Object _obj in _list)
+            {
+                m_uaList.Add((SUserAccount)_obj);
+            }
+           
             return true;
         }
 

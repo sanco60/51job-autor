@@ -43,6 +43,8 @@ namespace MyFirstWebTest
 
         public abstract string getTitle();
 
+        public abstract DatabaseObj clone();
+
         public void getValue(string szAttr, out string szValue)
         {
             if (null == m_AttrValues)
@@ -66,9 +68,10 @@ namespace MyFirstWebTest
             if (null == m_AttrValues)
                 return;
 
-            m_AttrValues.Add(szAttr, szValue);
+            m_AttrValues[szAttr] = szValue;
+            //m_AttrValues.Add(szAttr, szValue);
             return;
-        }
+        }        
 
         protected Dictionary<string, string> m_AttrValues;
     }

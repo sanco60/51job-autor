@@ -20,36 +20,47 @@ namespace MyFirstWebTest
         {
             m_Form = f;
             m_szContents = new string[(int)EFilter.EFilterMax];
+            for (int _i = 0; _i < m_szContents.Length; _i++)
+            {
+                m_szContents[_i] = "";
+            }
         }
 
         public bool isPass()
         {
             //int _webId = WebElementPool.WEB2_ID;
             string _szCoPattern = @"^((武汉)|(湖北))";
-            string _szJobPattern1 = @"测试";
             string _szJobPattern2 = @"((应届)|(实习))";
+            const int _cCorpSize = 1000;
+
+            string _szCurJobName = m_szContents[(int)EFilter.JobName];
+            string _szCurCorpName = m_szContents[(int)EFilter.CoName];
+            int _iCurCorpSize = 0;
+            if (0 == m_szContents[(int)EFilter.CoSize].Length)
+            {
+                _iCurCorpSize = _cCorpSize + 1;
+            } else
+            {
+                _iCurCorpSize = int.Parse(m_szContents[(int)EFilter.CoSize]);
+            }
 
             Regex r = new Regex(_szCoPattern);
             //如果是 武汉|湖北 开头的公司，规模小的屏蔽
-            if (r.IsMatch(m_szContents[(int)EFilter.CoName]))
+            if (r.IsMatch(_szCurCorpName))
             {
-                int _iSize = int.Parse(m_szContents[(int)EFilter.CoSize]);
-                if ( 1000 > _iSize )
+                if (_cCorpSize > _iCurCorpSize)
                     return false;
             }
 
-            r = new Regex(_szJobPattern1);
-            if (!r.IsMatch(m_szContents[(int)EFilter.JobName]))
-                return false;
-
             r = new Regex(_szJobPattern2);
-            if (r.IsMatch(m_szContents[(int)EFilter.JobName]))
+            if (r.IsMatch(_szCurJobName))
                 return false;
 
+            List<SForbiddenCorp> _fList = ForbiddenCorpManager.instance().getForbiddenCorps();
             //屏蔽指定公司
-            foreach (string _szNo in SayNoCoName.names)
+            foreach (SForbiddenCorp _fc in _fList)
             {
-                if (-1 != m_szContents[(int)EFilter.CoName].IndexOf(_szNo))
+                if (-1 != _szCurCorpName.IndexOf(_fc.szCorpName))
                 {
                     return false;
                 }

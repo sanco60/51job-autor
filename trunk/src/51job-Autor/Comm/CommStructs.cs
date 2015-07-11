@@ -6,16 +6,35 @@ using System.Threading.Tasks;
 
 namespace MyFirstWebTest
 {
-    struct SUserAccount
+    enum ESearchCata
+    {
+        EJobName,
+        ECoName,
+        EContent
+    }
+
+    enum EDatabaseType
+    {
+        EUserAccount,
+        ESearchFactor,
+        EForbiddenCorp
+    }
+
+    class SUserAccount
     {
         public string szID;
         public string szPassword;
     }
 
-    struct SSearchFactor
+    class SSearchFactor
     {
         public string szSearchText;
         public ESearchCata eSearchCata;
+    }
+
+    class SForbiddenCorp
+    {
+        public string szCorpName;
     }
 
 }

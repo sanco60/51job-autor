@@ -36,6 +36,10 @@ namespace MyFirstWebTest
         public const string TARGET = "target";
         public const string TR = "tr";
         public const string ALIGN = "align";
+        public const string NAME = "name";
+        public const string ALT = "alt";
+        public const string TITLE = "title";
+        public const string CCTYPE = "cctype";
 
         public const string CLICK = "click";
         //public const string MOUSEMOVE = "mousemove";
@@ -46,11 +50,7 @@ namespace MyFirstWebTest
     {
         public const string FILE_SUFFIX = ".txt";
         public const string NULL_STRING = "\"\"";
-    }
-
-    public static class SayNoCoName
-    {
-        public static string[] names = { "微创光电", "软凌信息", "中软国际", "易思博软件" };
+        public const string DATABASEPATH = "database/";
     }
 
     public struct Attribute

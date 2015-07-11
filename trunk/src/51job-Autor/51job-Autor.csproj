@@ -61,6 +61,10 @@
   <ItemGroup>
     <Compile Include="Action\ApplyAction.cs" />
     <Compile Include="Comm\ConstPool.cs" />
+    <Compile Include="Database\ForbiddenCorpAdapter.cs" />
+    <Compile Include="Database\SearchFactorAdapter.cs" />
+    <Compile Include="ForbiddenCorpManager.cs" />
+    <Compile Include="SearchFactorManager.cs" />
     <Compile Include="Utils\ConfigFileReader.cs" />
     <Compile Include="Database\DatabaseAccesor.cs" />
     <Compile Include="Database\DatabaseAdapter.cs" />

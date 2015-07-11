@@ -32,6 +32,14 @@ namespace MyFirstWebTest
             {
                 return false;
             }
+            if (!SearchFactorManager.init())
+            {
+                return false;
+            }
+            if (!ForbiddenCorpManager.init())
+            {
+                return false;
+            }
             return true;
         }
 

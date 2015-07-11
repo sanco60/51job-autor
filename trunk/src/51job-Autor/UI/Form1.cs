@@ -36,7 +36,7 @@ namespace MyFirstWebTest
             m_Web1Event = new AutoResetEvent(false);
             m_Web2Event = new AutoResetEvent(false);
             m_bWeb1EventHandled = false;
-            m_elementsQueue = new Queue<HtmlElement>();            
+            m_cachedElements = new List<HtmlElement>();
 
             mNavigate = new NavigateDelegate(navigate);
             mSetAttribute = new SetAttributeDelegate(setAttribute);
@@ -44,11 +44,11 @@ namespace MyFirstWebTest
             mInvokeMember = new InvokeMemberDelegate(invokeMember);
             mInvokeMember2 = new InvokeMember2Delegate(invokeMember2);
             mCacheElements = new CacheElementsDelegate(cacheElements);
-            mNextValueInCache = new NextValueInCacheDelegate(nextValueInCache);
-            mNextInvokeInCache = new NextInvokeInCacheDelegate(nextInvokeInCache);
-            mNextTextInCache = new NextTextInCacheDelegate(nextTextInCache);
             mCacheElements2 = new CacheElements2Delegate(cacheElements2);
-            mNextInvokeInCache2 = new NextInvokeInCache2Delegate(nextInvokeInCache);
+            mGetAttribute = new GetAttributeDelegate(getAttribute);
+            mCacheIndexText = new CacheIndexTextDelegate(cacheIndexText);
+            mCacheInvokeMember = new CacheInvokeMemberDelegate(cacheInvokeMember);
+            mCacheInvokeMemberD = new CacheInvokeMemberDDelegate(cacheInvokeMemberD);
 
             this.FormClosing += new FormClosingEventHandler(this.Form1_FormClosing);
         }
@@ -125,12 +125,15 @@ namespace MyFirstWebTest
         public void wait(int iWebID, int msTime)
         {
             AutoResetEvent _e = (WebElementPool.WEB1_ID == iWebID) ? m_Web1Event : m_Web2Event;
+            System.Windows.Forms.WebBrowser _webBrowser = (WebElementPool.WEB1_ID == iWebID) ? webBrowser1 : webBrowser2;
             if (0 == msTime)
             {
                 _e.WaitOne();
             } else
             {
                 _e.WaitOne(msTime);
+                _webBrowser.Stop();
+                _e.Reset();
             }
         }
 
@@ -198,6 +201,29 @@ namespace MyFirstWebTest
             return _elem;
         }
 
+        public bool getAttribute(int id, string szTag, Attribute sKey, ref Attribute sOutput)
+        {
+            bool bResult = false;
+            if (this.InvokeRequired)
+            {
+                object[] _objArgs = new object[] { id, szTag, sKey, sOutput };
+                bResult = (bool)this.Invoke(mGetAttribute, _objArgs);
+                sOutput = (Attribute)_objArgs[3];
+            }
+            else
+            {
+                HtmlElement _elem = this.findElement(id, szTag, sKey);
+                if (null == _elem)
+                {
+                    Console.WriteLine("Error: No element had been found.");
+                    return false;
+                }
+                sOutput.szValue = _elem.GetAttribute(sOutput.szKey);
+                bResult = true;
+            }
+            return bResult;
+        }
+
         public bool setAttribute(int id, string szID, string szValue)
         {
             Attribute sKey, sInput;
@@ -206,13 +232,14 @@ namespace MyFirstWebTest
             sInput.szKey = WebElementPool.VALUE;
             sInput.szValue = szValue;
             return setAttribute(id, WebElementPool.INPUT, sKey, sInput);
-        }
+        }        
 
         public bool setAttribute(int id, string szTag, Attribute sKey, Attribute sInput)
         {
+            bool bResult = false;
             if (this.InvokeRequired)
             {
-                this.Invoke(mSetAttribute, new object[] { id, szTag, sKey, sInput });
+                bResult = (bool)this.Invoke(mSetAttribute, new object[] { id, szTag, sKey, sInput });
             }
             else
             {
@@ -223,16 +250,17 @@ namespace MyFirstWebTest
                     return false;
                 }
                 _elem.SetAttribute(sInput.szKey, sInput.szValue);
+                bResult = true;
             }
-
-            return true;
+            return bResult;
         }
 
         public bool setAttribute2(int id, string szTag, string szRegex, Attribute sInput)
         {
+            bool bResult = false;
             if (this.InvokeRequired)
             {
-                this.Invoke(mSetAttribute2, new object[] { id, szTag, szRegex, sInput });
+                bResult = (bool)this.Invoke(mSetAttribute2, new object[] { id, szTag, szRegex, sInput });
             }
             else
             {
@@ -249,10 +277,11 @@ namespace MyFirstWebTest
                 } else
                 {
                     Console.WriteLine("Error: there isn't attribute: {0}", sInput.szKey);
+                    return false;
                 }
+                bResult = true;
             }
-
-            return true;
+            return bResult;
         }
 
         public bool invokeMember(int id, Attribute sKey, string szAction)
@@ -262,9 +291,10 @@ namespace MyFirstWebTest
 
         public bool invokeMember(int id, string szTag, Attribute sKey, string szAction)
         {
+            bool bResult = false;
             if (this.InvokeRequired)
             {
-                this.Invoke(mInvokeMember, new object[] { id, szTag, sKey, szAction });
+                bResult = (bool)this.Invoke(mInvokeMember, new object[] { id, szTag, sKey, szAction });
             } else
             {
                 AutoResetEvent _event = (WebElementPool.WEB1_ID == id) ? m_Web1Event : m_Web2Event;
@@ -277,8 +307,9 @@ namespace MyFirstWebTest
                     return false;
                 }
                 _elem.InvokeMember(szAction);
+                bResult = true;
             }
-            return true;
+            return bResult;
         }
 
         public bool invokeMember2(int id, string szTag, string szRegex, string szAction)
@@ -314,7 +345,7 @@ namespace MyFirstWebTest
             {
                 System.Windows.Forms.WebBrowser _webBrowser = (WebElementPool.WEB1_ID == id) ? webBrowser1 : webBrowser2;
                 System.Windows.Forms.HtmlElementCollection hc = null;
-                m_elementsQueue.Clear();
+                m_cachedElements.Clear();
 
                 hc = _webBrowser.Document.GetElementsByTagName(szTag);
                 if (null == hc)
@@ -325,7 +356,8 @@ namespace MyFirstWebTest
                 {
                     if (r.IsMatch(e.OuterHtml))
                     {
-                        m_elementsQueue.Enqueue(e);
+                        m_cachedElements.Add(e);
+                        //m_elementsQueue.Enqueue(e);
                     }
                 }
             }
@@ -342,7 +374,7 @@ namespace MyFirstWebTest
             {
                 System.Windows.Forms.WebBrowser _webBrowser = (WebElementPool.WEB1_ID == id) ? webBrowser1 : webBrowser2;
                 System.Windows.Forms.HtmlElementCollection hc = null;
-                m_elementsQueue.Clear();
+                m_cachedElements.Clear();
 
                 hc = _webBrowser.Document.GetElementsByTagName(szTag);
                 if (null == hc)
@@ -358,118 +390,16 @@ namespace MyFirstWebTest
 
                     if (r.IsMatch(_tmpValue))
                     {
-                        m_elementsQueue.Enqueue(e);
+                        m_cachedElements.Add(e);
                     }
                 }
             }
             return;
         }
-
-        public bool nextValueInCache(string szTag, string szRegex, ref Attribute sAttribute)
-        {
-            if (this.InvokeRequired)
-            {
-                object[] objArgs = new object[] { szTag, szRegex, sAttribute };
-                this.Invoke(mNextValueInCache, objArgs);
-                sAttribute = (Attribute)objArgs[2];
-            } else
-            {
-                if (0 == m_elementsQueue.Count)
-                    return false;
-
-                HtmlElement elem = m_elementsQueue.Peek();
-                Regex r = new Regex(szRegex);
-
-                foreach (HtmlElement e in elem.GetElementsByTagName(szTag))
-                {
-                    if (r.IsMatch(e.OuterHtml))
-                    {
-                        sAttribute.szValue = e.GetAttribute(sAttribute.szKey);
-                        break;
-                    }
-                }
-            }
-            return true;
-        }
-
-        public bool nextTextInCache(string szTag, string szRegex, ref string szText)
-        {
-            if (this.InvokeRequired)
-            {
-                object[] objArgs = new object[] { szTag, szRegex, szText };
-                this.Invoke(mNextTextInCache, objArgs);
-                szText = (string)objArgs[2];
-            }
-            else
-            {
-                if (0 == m_elementsQueue.Count)
-                    return false;
-
-                HtmlElement elem = m_elementsQueue.Peek();
-                Regex r = new Regex(szRegex);
-
-                foreach (HtmlElement e in elem.GetElementsByTagName(szTag))
-                {
-                    if (r.IsMatch(e.OuterHtml))
-                    {
-                        szText = e.OuterText;
-                        break;
-                    }
-                }
-            }
-            return true;
-        }
-
-        public void nextInvokeInCache(string szTag, string szRegex, string szAction)
-        {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(mNextInvokeInCache, new object[] { szTag, szRegex, szAction });
-            } else
-            {
-                if (0 == m_elementsQueue.Count)
-                    return;
-
-                HtmlElement elem = m_elementsQueue.Peek();
-                Regex r = new Regex(szRegex);
-
-                foreach (HtmlElement e in elem.GetElementsByTagName(szTag))
-                {
-                    if (r.IsMatch(e.OuterHtml))
-                    {
-                        e.InvokeMember(szAction);
-                        break;
-                    }
-                }
-            }
-            return;
-        }
-
-        public void nextInvokeInCache(string szAction)
-        {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(mNextInvokeInCache2, new object[] { szAction });
-            } else
-            {
-                HtmlElement elem = m_elementsQueue.Peek();
-                elem.InvokeMember(szAction);
-            }
-            return;
-        }
-
-        public void cacheNext()
-        {
-            if (0 == m_elementsQueue.Count)
-                return;
-
-            m_elementsQueue.Dequeue();
-            return;
-        }
-
+        
         public int cacheCount()
         {
-            return m_elementsQueue.Count;
+            return m_cachedElements.Count;
         }
 
         public void closeMessageBox()
@@ -488,6 +418,89 @@ namespace MyFirstWebTest
             }
         }
 
+        public bool cacheInvokeMemberD(int index, string szAction)
+        {
+            bool bResult = false;
+            if (this.InvokeRequired)
+            {
+                object[] _objArray = new object[] { index, szAction };
+                bResult = (bool)this.Invoke(mCacheInvokeMemberD, _objArray);
+            }
+            else
+            {
+                if (0 > index || m_cachedElements.Count <= index)
+                    return false;
+
+                HtmlElement elem = m_cachedElements[index];
+                elem.InvokeMember(szAction);
+
+                bResult = true;
+            }
+            return bResult;
+        }
+
+        public bool cacheInvokeMember(int index, string szTag, string szPattern, string szAction)
+        {
+            bool bResult = false;
+            if (this.InvokeRequired)
+            {
+                object[] _objArray = new object[] { index, szTag, szPattern, szAction };
+                bResult = (bool)this.Invoke(mCacheInvokeMember, _objArray);
+            }
+            else
+            {
+                if (0 > index || m_cachedElements.Count <= index)
+                    return false;
+
+                HtmlElement elem = m_cachedElements[index];
+                //m_elementsQueue.Peek();
+                Regex r = new Regex(szPattern);
+
+                foreach (HtmlElement e in elem.GetElementsByTagName(szTag))
+                {
+                    if (r.IsMatch(e.OuterHtml))
+                    {
+                        e.InvokeMember(szAction);
+                        bResult = true;
+                        break;
+                    }
+                }
+            }
+            return bResult;
+        }
+
+        public bool cacheIndexText(int index, string szTag, string szPattern, ref string szText)
+        {
+            bool bResult = false;
+            if (this.InvokeRequired)
+            {
+                object[] _objArray = new object[] { index, szTag, szPattern, szText };
+                bResult = (bool)this.Invoke(mCacheIndexText, _objArray);
+                if (bResult)
+                    szText = (string)_objArray[3];
+            }
+            else
+            {
+                if (0 > index || m_cachedElements.Count <= index)
+                    return false;
+
+                HtmlElement elem = m_cachedElements[index];
+                //m_elementsQueue.Peek();
+                Regex r = new Regex(szPattern);
+
+                foreach (HtmlElement e in elem.GetElementsByTagName(szTag))
+                {
+                    if (r.IsMatch(e.OuterHtml))
+                    {
+                        szText = e.OuterText;
+                        bResult = true;
+                        break;
+                    }
+                }
+            }
+            return bResult;
+        }
+
         private Thread m_Thread;
 
         private bool m_bThreadStarted;
@@ -504,7 +517,7 @@ namespace MyFirstWebTest
 
         private bool m_bWeb1EventHandled;
 
-        private Queue<HtmlElement> m_elementsQueue;
+        private List<HtmlElement> m_cachedElements;
 
         /*******  代理 *******/
         public delegate void NavigateDelegate(int id, string url, int msTime);
@@ -518,6 +531,10 @@ namespace MyFirstWebTest
         public delegate bool NextTextInCacheDelegate(string szTag, string szRegex, ref string szText);
         public delegate void CacheElements2Delegate(int id, string szTag, Attribute sAttr);
         public delegate void NextInvokeInCache2Delegate(string szAction);
+        public delegate bool GetAttributeDelegate(int id, string szTag, Attribute sKey, ref Attribute sOutput);
+        public delegate bool CacheIndexTextDelegate(int index, string szTag, string szPattern, ref string szText);
+        public delegate bool CacheInvokeMemberDelegate(int index, string szTag, string szPattern, string szAction);
+        public delegate bool CacheInvokeMemberDDelegate(int index, string szAction);
 
         private NavigateDelegate mNavigate;
 
@@ -531,14 +548,14 @@ namespace MyFirstWebTest
 
         private CacheElementsDelegate mCacheElements;
 
-        private NextValueInCacheDelegate mNextValueInCache;
-
-        private NextInvokeInCacheDelegate mNextInvokeInCache;
-
-        private NextTextInCacheDelegate mNextTextInCache;
-
         private CacheElements2Delegate mCacheElements2;
 
-        private NextInvokeInCache2Delegate mNextInvokeInCache2;
+        private GetAttributeDelegate mGetAttribute;
+
+        private CacheIndexTextDelegate mCacheIndexText;
+
+        private CacheInvokeMemberDelegate mCacheInvokeMember;
+
+        private CacheInvokeMemberDDelegate mCacheInvokeMemberD;
     }
 }
