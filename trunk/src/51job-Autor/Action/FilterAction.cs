@@ -31,7 +31,7 @@ namespace MyFirstWebTest
             //int _webId = WebElementPool.WEB2_ID;
             string _szCoPattern = @"^((武汉)|(湖北))";
             string _szJobPattern2 = @"((应届)|(实习))";
-            const int _cCorpSize = 1000;
+            const int _cCorpSize = 500;
 
             string _szCurJobName = m_szContents[(int)EFilter.JobName];
             string _szCurCorpName = m_szContents[(int)EFilter.CoName];

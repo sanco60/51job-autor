@@ -55,33 +55,37 @@ namespace MyFirstWebTest
                 {
                     //获取职位名称
                     m_Form.cacheIndexText(_i, WebElementPool.A, _szJobRegex, ref _szJobName);
-                    //m_Form.nextTextInCache(WebElementPool.A, _szJobRegex, ref _szJobName);
                     //获取公司名称
                     m_Form.cacheIndexText(_i, WebElementPool.A, _szCoRegex, ref _szCoName);
-                    //m_Form.nextTextInCache(WebElementPool.A, _szCoRegex, ref _szCoName);                    
 
                     //获取公司规模
                     m_Form.cacheIndexText(_i+1, WebElementPool.TD, _szCoDetailsPattern, ref _szCoDetails);
+                    string _szCorpMaxSize = _rg.Match(_szCoDetails).ToString();
                     //m_Form.nextTextInCache(WebElementPool.TD, _szCoDetailsPattern, ref _szCoDetails);
                     
                     m_FilterAction.setContent(EFilter.JobName, _szJobName);
                     m_FilterAction.setContent(EFilter.CoName, _szCoName);
-                    m_FilterAction.setContent(EFilter.CoSize, _rg.Match(_szCoDetails).ToString());
+                    m_FilterAction.setContent(EFilter.CoSize, _szCorpMaxSize);
 
                     if (m_FilterAction.isPass())
                     {
-                        //Console.WriteLine("+++ 公司名：{0} +++", _szCoName);
                         m_Form.cacheInvokeMember(_i, WebElementPool.INPUT, _szCheckRegex, WebElementPool.CLICK);
-                        //m_Form.nextInvokeInCache(WebElementPool.INPUT, _szCheckRegex, WebElementPool.CLICK);
+                    } else
+                    {
+                        Console.WriteLine("No {0}, {1}, {2}", _szCoName, _szCorpMaxSize, _szJobName);
+//                         if (0 == _szCorpMaxSize.IndexOf("5000"))
+//                         {
+//                             Console.Read();
+//                         }
                     }
                     //m_Form.cacheNext();
                 }
                 //点击申请选中职位
-//                 m_Form.invokeMember2(_webID, WebElementPool.A, _szBtnApply, WebElementPool.CLICK);
-                 m_Form.wait(_webID, 10000);
+                m_Form.invokeMember2(_webID, WebElementPool.A, _szBtnApply, WebElementPool.CLICK);
+                m_Form.wait(_webID, 10000);
                 
                 //关闭弹出子窗口
-//                m_Form.invokeMember(_webID, WebElementPool.IMG, _btnClose, WebElementPool.CLICK);
+                m_Form.invokeMember(_webID, WebElementPool.IMG, _btnClose, WebElementPool.CLICK);
 
                 //点击下一页
                 bNext = m_Form.invokeMember2(_webID, WebElementPool.A, _szBtnNext, WebElementPool.CLICK);

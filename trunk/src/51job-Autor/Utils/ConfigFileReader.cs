@@ -63,6 +63,9 @@ namespace MyFirstWebTest
             if (null == szLine || 0 == szLine.Length)
                 return;
 
+            if ('#' == szLine[0])
+                return;
+
             char [] cSplits = {' ', '\t'};
             string[] szSplits = szLine.Split(cSplits);
             foreach(string _sz in szSplits)
