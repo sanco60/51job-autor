@@ -72,13 +72,8 @@ namespace MyFirstWebTest
                         m_Form.cacheInvokeMember(_i, WebElementPool.INPUT, _szCheckRegex, WebElementPool.CLICK);
                     } else
                     {
-                        Console.WriteLine("No {0}, {1}, {2}", _szCoName, _szCorpMaxSize, _szJobName);
-//                         if (0 == _szCorpMaxSize.IndexOf("5000"))
-//                         {
-//                             Console.Read();
-//                         }
+                        //Console.WriteLine("No {0}, {1}, {2}", _szCoName, _szCorpMaxSize, _szJobName);
                     }
-                    //m_Form.cacheNext();
                 }
                 //点击申请选中职位
                 m_Form.invokeMember2(_webID, WebElementPool.A, _szBtnApply, WebElementPool.CLICK);
